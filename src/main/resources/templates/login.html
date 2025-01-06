@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"> <!-- Optional: Link to your CSS file -->
+</head>
+<body>
+<h2>Login</h2>
+<form th:action="@{/login}" method="post">
+    <!-- CSRF Token -->
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <!-- Username Field -->
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+    </div>
+
+    <!-- Password Field -->
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+    </div>
+
+    <!-- Submit Button -->
+    <div>
+        <button type="submit">Login</button>
+    </div>
+</form>
+
+<!-- Display error message if login fails -->
+<div th:if="${param.error}">
+    <p style="color: red;">Invalid username or password.</p>
+</div>
+
+<!-- Display logout message if user logs out -->
+<div th:if="${param.logout}">
+    <p style="color: green;">You have been logged out.</p>
+</div>
+</body>
+</html>

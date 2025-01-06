@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"> <!-- Optional: Link to your CSS file -->
+</head>
+<body>
+<h2>Welcome to the Home Page!</h2>
+
+<!-- Display authenticated user's username -->
+<div th:if="${#authentication.isAuthenticated()}">
+    <p>Hello, <span th:text="${#authentication.name}">User</span>!</p>
+</div>
+
+<!-- Logout Form -->
+<form th:action="@{/logout}" method="post">
+    <!-- CSRF Token -->
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit">Logout</button>
+</form>
+</body>
+</html>
