@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Home</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+    <h1>Welcome, Admin!</h1>
+    <nav>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/books">View Books</a></li>
+            <li><a href="/add-book">Add Book</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h2>Admin Dashboard</h2>
+    <p>As an admin, you have full access to the system.</p>
+    <div>
+        <h3>Manage Library Books</h3>
+        <ul>
+            <li><a href="/books">View All Books</a></li>
+            <li><a href="/add-book">Add New Book</a></li>
+            <li><a href="/books/edit">Edit Book Information</a></li>
+            <li><a href="/books/delete">Delete Books</a></li>
+        </ul>
+    </div>
+    <div>
+        <h3>User Management</h3>
+        <ul>
+            <li><a href="/users">View Users</a></li>
+            <li><a href="/users/manage">Manage Users</a></li>
+        </ul>
+    </div>
+</section>
+
+</body>
+</html>

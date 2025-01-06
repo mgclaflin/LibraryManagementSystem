@@ -8,23 +8,32 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceImpl implements UserDetailsService {
+public class UserService implements UserDetailsService {
 
     private final UserRepo userRepository;
 
-    public UserServiceImpl(UserRepo userRepository) {
+    public UserService(UserRepo userRepository) {
         this.userRepository = userRepository;
     }
+
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+//
+//        return org.springframework.security.core.userdetails.User
+//                .withUsername(user.getUsername())
+//                .password(user.getPassword())
+//                .roles(user.getRole()) // Ensure roles are prefixed with "ROLE_"
+//                .build();
+//    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles(user.getRole()) // Ensure roles are prefixed with "ROLE_"
-                .build();
+        // Return your custom User object
+        return user;
     }
 }

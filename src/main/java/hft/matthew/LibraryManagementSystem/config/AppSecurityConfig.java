@@ -1,11 +1,10 @@
 package hft.matthew.LibraryManagementSystem.config;
 
-import hft.matthew.LibraryManagementSystem.service.UserServiceImpl;
+import hft.matthew.LibraryManagementSystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,29 +16,36 @@ import org.springframework.security.web.SecurityFilterChain;
 public class AppSecurityConfig {
 
     @Autowired
-    private UserServiceImpl userService; // Ensure this implements UserDetailsService
+    private UserService userService; // Ensure this implements UserDetailsService
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authenticationManagerBuilder =
-//                http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authenticationManagerBuilder
-//                .userDetailsService(userService) // Use the custom UserDetailsService
-//                .passwordEncoder(passwordEncoder()); // Use the password encoder
-//        return authenticationManagerBuilder.build();
-//    }
+
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userService); // Set your custom UserDetailsService
+        authProvider.setPasswordEncoder(passwordEncoder()); // Set the password encoder
+        return authProvider;
+    }
+
+
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/public/**")) // Example: Disable CSRF for specific endpoints
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**").permitAll() // Public endpoints
+                        .requestMatchers("/", "/home", "/login", "/public/**").permitAll() // Public endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Admin-only endpoints
+                        .requestMatchers("/librarian/**").hasRole("LIBRARIAN") // Librarian-only endpoints
+                        .requestMatchers("/member/**").hasRole("MEMBER") // Member-only endpoints
                         .anyRequest().authenticated() // All other endpoints require authentication
                 )
                 .formLogin(form -> form
@@ -51,8 +57,33 @@ public class AppSecurityConfig {
                         .logoutUrl("/logout") // Custom logout URL
                         .logoutSuccessUrl("/login?logout") // Redirect to login page after logout
                         .permitAll() // Allow everyone to access the logout endpoint
-                );
+                )
+                .authenticationProvider(authenticationProvider()); // Use your custom authentication provider
 
         return http.build();
     }
+
+
+//
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.ignoringRequestMatchers("/public/**")) // Example: Disable CSRF for specific endpoints
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/public/**").permitAll() // Public endpoints
+//                        .anyRequest().authenticated() // All other endpoints require authentication
+//                )
+//                .formLogin(form -> form
+//                        .loginPage("/login") // Custom login page
+//                        .defaultSuccessUrl("/home", true) // Redirect to dashboard after login
+//                        .permitAll() // Allow everyone to access the login page
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout") // Custom logout URL
+//                        .logoutSuccessUrl("/login?logout") // Redirect to login page after logout
+//                        .permitAll() // Allow everyone to access the logout endpoint
+//                );
+//
+//        return http.build();
+//    }
 }
