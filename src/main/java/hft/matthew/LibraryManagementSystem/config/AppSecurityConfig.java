@@ -1,63 +1,58 @@
 package hft.matthew.LibraryManagementSystem.config;
 
+import hft.matthew.LibraryManagementSystem.service.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class AppSecurityConfig {
 
+    @Autowired
+    private UserServiceImpl userService; // Ensure this implements UserDetailsService
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+//    @Bean
+//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+//        AuthenticationManagerBuilder authenticationManagerBuilder =
+//                http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder
+//                .userDetailsService(userService) // Use the custom UserDetailsService
+//                .passwordEncoder(passwordEncoder()); // Use the password encoder
+//        return authenticationManagerBuilder.build();
+//    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/public/**", "/css/**", "/js/**").permitAll() // Allow access to login and public resources
-                        .anyRequest().authenticated()
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/public/**")) // Example: Disable CSRF for specific endpoints
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/public/**").permitAll() // Public endpoints
+                        .anyRequest().authenticated() // All other endpoints require authentication
                 )
                 .formLogin(form -> form
                         .loginPage("/login") // Custom login page
+                        .defaultSuccessUrl("/home", true) // Redirect to dashboard after login
                         .permitAll() // Allow everyone to access the login page
-                        .defaultSuccessUrl("/home", true) // Redirect to /home after successful login
                 )
                 .logout(logout -> logout
-                        .permitAll() // Allow everyone to access the logout endpoint
+                        .logoutUrl("/logout") // Custom logout URL
                         .logoutSuccessUrl("/login?logout") // Redirect to login page after logout
-                )
-                .httpBasic(withDefaults());
+                        .permitAll() // Allow everyone to access the logout endpoint
+                );
 
         return http.build();
     }
-
-    @Bean
-    public UserDetailsService userDetailsService(){
-
-        UserDetails member = User.withUsername("member")
-                .password("{noop}password")
-                .roles("Member")
-                .build();
-
-        UserDetails admin = User.withUsername("admin")
-                .password("{noop}adminpassword")
-                .roles("Admin")
-                .build();
-
-        UserDetails librarian = User.withUsername("librarian")
-                .password("{noop}librarianpassword")
-                .roles("Librarian")
-                .build();
-
-        return new InMemoryUserDetailsManager(member, admin, librarian);
-    }
-
-
 }
